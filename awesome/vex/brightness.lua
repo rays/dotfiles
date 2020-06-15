@@ -10,31 +10,23 @@ local recolor_image = gears_color.recolor_image
 
 local brightness = {mt = {}}
 
-local style = {
-    width = 56,
-    icon = beautiful.themes_path .. "icons/brightness.svg"
-}
+local style = {width = 56, icon = beautiful.wicons.brightness}
 
---local GET_BRIGHTNESS_CMD = "xbacklight -get"
+-- local GET_BRIGHTNESS_CMD = "xbacklight -get"
 local brightness_cmd = "light -G"
 
 local function update_status(self)
-    awful.spawn.with_line_callback(
-        brightness_cmd,
-        {
-            stdout = function(line)
-                local brightness_level = tonumber(string.format("%.0f", line))
-                self.text:set_text(brightness_level .. "%")
-            end,
-            stderr = function()
-            end
-        }
-    )
+    awful.spawn.with_line_callback(brightness_cmd, {
+        stdout = function(line)
+            local brightness_level = tonumber(string.format("%.0f", line))
+            self.text:set_text(brightness_level .. "%")
+        end,
+        stderr = function() end
+    })
 end
 
 function brightness.new(timeout)
-    local icon =
-        wibox.widget {
+    local icon = wibox.widget{
         image = recolor_image(style.icon, beautiful.widget.fg),
         resize = true,
         forced_width = 16,
@@ -42,8 +34,7 @@ function brightness.new(timeout)
         widget = wibox.widget.imagebox
     }
 
-    local text =
-        wibox.widget {
+    local text = wibox.widget{
         text = "0%",
         align = "center",
         valign = "center",
@@ -51,7 +42,8 @@ function brightness.new(timeout)
         widget = wibox.widget.textbox
     }
 
-    local layout = wibox.layout.fixed.horizontal(wibox.container.place(icon), text)
+    local layout = wibox.layout.fixed.horizontal(wibox.container.place(icon),
+                                                 text)
 
     local widget = wibox.container.constraint(layout, "exact", style.width)
     local self = widget_base.make_widget(widget)
@@ -68,33 +60,17 @@ function brightness.new(timeout)
     end
 
     -- Mouse bindings
-    self:buttons(
-        gears.table.join(
-            button(
-                {},
-                4,
-                function()
-                    self.set_brightness(2)
-                end
-            ),
-            button(
-                {},
-                5,
-                function()
-                    self.set_brightness(-2)
-                end
-            )
-        )
-    )
+    self:buttons(gears.table.join(button({}, 4,
+                                         function() self.set_brightness(2) end),
+                                  button({}, 5,
+                                         function() self.set_brightness(-2) end)))
 
     update_status(self)
-    gears.timer {
+    gears.timer{
         timeout = timeout,
         call_now = true,
         autostart = true,
-        callback = function()
-            update_status(self)
-        end
+        callback = function() update_status(self) end
     }
     return self
 end
@@ -102,9 +78,7 @@ end
 local _instance = nil
 
 function brightness.mt:__call(...)
-    if _instance == nil then
-        _instance = self.new(...)
-    end
+    if _instance == nil then _instance = self.new(...) end
     return _instance
 end
 

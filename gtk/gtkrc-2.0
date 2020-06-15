@@ -1,4 +1,4 @@
-gtk-icon-theme-name   = "Papirus-Dark"
-gtk-theme-name        = "Adapta-Eta"
+gtk-icon-theme-name   = "oomox-purple-spice"
+gtk-theme-name        = "oomox-purple-spice"
 gtk-cursor-theme-name = "Adwaita"
-gtk-font-name         = "Arimo 11"
+gtk-font-name         = "Fira Sans 11"

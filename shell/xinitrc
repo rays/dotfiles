@@ -1,23 +1,38 @@
 #!/bin/sh
-export SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS=0
 
-dbus-daemon --session &
-start-pulseaudio-x11
-
-eval $(ssh-agent -s)
-dbus-update-activation-environment --systemd DISPLAY
-eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
-export SSH_AUTH_SOCK
-/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+if [ -d /etc/X11/xinit/xinitrc.d ]; then
+  for f in /etc/X11/xinit/xinitrc.d/*; do
+    [ -x "$f" ] && . "$f"
+  done
+  unset f
+fi
 
 [[ -f ~/.Xresources ]] && xrdb -merge -I$HOME ~/.Xresources
 
+# dbus-daemon --session &
+# dbus-update-activation-environment --systemd DISPLAY
+
+#eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
+#export SSH_AUTH_SOCK
+
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+
+
 if [ "$(cat /etc/hostname)" = "atreides" ]; then
-  xrandr --output HDMI-A-0 --primary --auto --left-of DVI-I-1
+  xrandr --output DVI-D-1 --primary --auto --left-of HDMI-A-0
+elif [ "$(cat /etc/hostname)" = "arakis" ]; then
+  /usr/bin/lxpolkit &
+  xrandr --output HDMI-1 --primary --mode 1920x1080 --above eDP-1
 fi
 
+xset s 1200 1300
+xset dpms 1200 1300 1400
+xset r rate 350 60
+
+start-pulseaudio-x11 &
+
 # setxkbmap -model "evdev" -rules "evdev" \
-#   -layout "us,pt" -variant "altgr-intl,sundeadkeys" \
+#   -layout "us,pt" \
 #   -option "grp:alt_shift_toggle" -option caps:swapescape -option terminate:ctrl_alt_bksp
 
 exec awesome
